@@ -6,7 +6,7 @@ from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import  train_test_split
 from sklearn import metrics
-
+from sklearn.compose import make_column_transformer
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
@@ -14,8 +14,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 
-class MLUtils(object):
-    def main(self, X: pd.DataFrame, y: any, tran_enc=False):
+class MLUtils():
+    def gv_scoring(self, X: pd.DataFrame, y: any, tran_enc=False):
         """ Init class for ml utils
 
         Args:
@@ -26,7 +26,23 @@ class MLUtils(object):
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=.3, random_state=1)
 
         return self.grid_search(self.X_train, self.y_train, self.X_test, self.y_test, transform=tran_enc)
-        
+    
+    def one_hot_encode_dataf(self, dataf: pd.DataFrame) -> pd.DataFrame:
+        """ One-hot encode the dataf
+
+        Args:
+            dataf (pd.DataFrame): Dataframe
+
+        Returns:
+            pd.DataFrame: Dataframe with one-hot encoded values
+        """
+        cat_cols = [col for col in dataf.columns if dataf[col].dtypes in ("object", "category")]
+
+        transformer = make_column_transformer((OneHotEncoder(), cat_cols), remainder='passthrough')
+        t = transformer.fit_transform(dataf)
+
+        return pd.DataFrame(t, columns=transformer.get_feature_names_out())
+
     def _transform_columns(self, X_train: pd.DataFrame, model: object) -> object:
         """Applies hot encoding, minmax scaling to columns 
             and returns the pipeline.
@@ -39,7 +55,7 @@ class MLUtils(object):
             object: returns pipeline with encoders/scalers
         """
         self.X_train = X_train
-        
+
         x_train_num_cols = [col for col in self.X_train.columns if self.X_train[col].dtypes in ("int64", "float64")]
         x_train_cat_cols = [col for col in self.X_train.columns if self.X_train[col].dtypes in ("object", "category")]
         
