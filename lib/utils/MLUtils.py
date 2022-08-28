@@ -1,12 +1,10 @@
 """Utility functions for ML Models"""
 import pandas as pd
-from collections import Counter
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, PolynomialFeatures, MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import cross_val_score, train_test_split
-from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import  train_test_split
 from sklearn import metrics
 
 from sklearn.svm import SVC
@@ -40,6 +38,8 @@ class MLUtils(object):
         Returns:
             object: returns pipeline with encoders/scalers
         """
+        self.X_train = X_train
+        
         x_train_num_cols = [col for col in self.X_train.columns if self.X_train[col].dtypes in ("int64", "float64")]
         x_train_cat_cols = [col for col in self.X_train.columns if self.X_train[col].dtypes in ("object", "category")]
         
